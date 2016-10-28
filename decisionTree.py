@@ -92,17 +92,17 @@ class treeNode(object):
 		del new_index_list[max_infromation_gain_ratio[0]]
 		for i in self.children:
 			self.children[i].grow(data, new_index_list, threshold)
-	def purning(self, data, alpha):
-		before_purning = 0
+	def pruning(self, data, alpha):
+		before_pruning = 0
 		for i in self.children:
-			before_purning += len(self.children[i].instances_num)*self.children[i].entropy(data)
-		before_purning += alpha*len(self.children)
-		after_purning = self.entropy(data)*len(self.instances_num)
-		if after_purning < before_purning:
+			before_pruning += len(self.children[i].instances_num)*self.children[i].entropy(data)
+		before_pruning += alpha*len(self.children)
+		after_pruning = self.entropy(data)*len(self.instances_num)
+		if after_pruning < before_pruning:
 			self.children = {}
 			self.end(data)
 		for i in self.children:
-			self.children[i].purning(data,alpha)
+			self.children[i].pruning(data,alpha)
 	#Check the tree's children and itself
 	#the instances in children should be classified correctly
 	#its target should be the maximum element in its instances
@@ -166,7 +166,7 @@ for alpha in list(map(lambda i:(i+1)*0.1,range(20))):
 	list_threshold=[]
 	for threshold in list(map(lambda i:(i+1)*0.01,range(20))):
 		decisionTree = makeDecisionTree(train_data, threshold)
-		decisionTree.purning(data, alpha)
+		decisionTree.pruning(data, alpha)
 		account = 0
 		for i in range(len(check_data)):
 			if not decisionTree.apply(check_data[i])==check_data[i][len(check_data[i])-1]:
@@ -181,6 +181,7 @@ threshold = np.arange(0.01, 0.21, 0.01)
 alpha, threshold = np.meshgrid(alpha, threshold)
 surf = ax.plot_surface(alpha, threshold, np.array(parameter_study),rstride=1, cstride=1, cmap=cm.coolwarm,linewidth=0, antialiased=False)
 plt.show()
+
 #for threshold in list(map(lambda i:(i+1)*0.02,range(10))):
 #	decisionTree = makeDecisionTree(train_data, threshold)
 #	account = 0
