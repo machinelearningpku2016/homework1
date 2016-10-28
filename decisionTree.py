@@ -8,6 +8,11 @@ def cal_entropy(list):
 	for i in Count:
 		entropy += -1*Count[i]/total*np.log2(Count[i]/total)
 	return entropy
+def test_all_same(list, example):
+	for i in list:
+		if not i==example:
+			return False
+	return True
 class treeNode(object):
 	def __init__(self, parent, instances_num):
 		self.parent = parent
@@ -117,4 +122,3 @@ for threshold in list(map(lambda i:(i+1)*0.1,range(10))):
 	for i in range(1600,len(data)):
 		if not decisionTree.apply(data[i])==data[i][len(data[i])-1]:
 			account += 1
-	print(threshold," ",account/len(data))
