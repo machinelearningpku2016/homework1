@@ -1,4 +1,8 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
+from mpl_toolkits.mplot3d import Axes3D
 from collections import Counter
 
 def cal_entropy(list):
@@ -95,7 +99,6 @@ class treeNode(object):
 		before_purning += alpha*len(self.children)
 		after_purning = self.entropy(data)*len(self.instances_num)
 		if after_purning < before_purning:
-			print('cut')
 			self.children = {}
 			self.end(data)
 		for i in self.children:
@@ -126,11 +129,7 @@ class treeNode(object):
 		return self.children[x[self.index_num]].apply(x)
 	def printTree(data):
 		pass
-def check_end_test(tree, data):
-	for i in tree.instances_num:
-		if not data[i][len(data[i])-1]==data[0][len(data[0])-1]:
-			return False
-	return True
+
 def makeDecisionTree(data, threshold):
 	#initial index interpret
 	#key:value -> column_in_inputdata: [choice1, choice2...]
@@ -143,7 +142,6 @@ def makeDecisionTree(data, threshold):
 			if not data[i][index_num] in index[index_num]:
 				index[index_num].append(data[i][index_num])
 	#index set finished
-#	print (index)
 	decisionTree = treeNode(None, list(range(len(data))))
 	decisionTree.grow(data, index, threshold)
 	return decisionTree
@@ -162,14 +160,27 @@ for i in range(len(data)):
 train_data=list(map(lambda k:data[k], train_list))
 check_data=list(map(lambda k:data[k], check_list))
 test_data=list(map(lambda k:data[k], test_list))
-for alpha in list(map(lambda i:(i+1)*0.2,range(2))):
-	decisionTree = makeDecisionTree(train_data, 0.1)
-	decisionTree.purning(data, alpha)
-	account = 0
-	for i in range(len(check_data)):
-		if not decisionTree.apply(check_data[i])==check_data[i][len(check_data[i])-1]:
-			account += 1
-	print(alpha," ",account/(len(check_data)))
+
+parameter_study=[]
+for alpha in list(map(lambda i:(i+1)*0.1,range(20))):
+	list_threshold=[]
+	for threshold in list(map(lambda i:(i+1)*0.01,range(20))):
+		decisionTree = makeDecisionTree(train_data, threshold)
+		decisionTree.purning(data, alpha)
+		account = 0
+		for i in range(len(check_data)):
+			if not decisionTree.apply(check_data[i])==check_data[i][len(check_data[i])-1]:
+				account += 1
+		list_threshold.append(1-account/len(check_data))
+	parameter_study.append(list_threshold)
+	
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+alpha = np.arange(0.1, 2.1, 0.1)
+threshold = np.arange(0.01, 0.21, 0.01)
+alpha, threshold = np.meshgrid(alpha, threshold)
+surf = ax.plot_surface(alpha, threshold, np.array(parameter_study),rstride=1, cstride=1, cmap=cm.coolwarm,linewidth=0, antialiased=False)
+plt.show()
 #for threshold in list(map(lambda i:(i+1)*0.02,range(10))):
 #	decisionTree = makeDecisionTree(train_data, threshold)
 #	account = 0
